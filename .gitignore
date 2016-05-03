@@ -7,6 +7,8 @@
 _obj
 _test
 .idea
+db
+logs
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -26,3 +28,6 @@ _testmain.go
 *.iml
 
 GmailToJet
+
+client_id.json
+client_secret.json

@@ -7,7 +7,7 @@ func buildQueryString(emails []string) (string) {
 	newerThanStr := " newer_than:14d"
 	confimationStr := " subject:confirmation"
 
-	for email := range emails {
+	for _,email := range emails {
 		if (emailStr == "") {
 			emailStr = emailStr + email
 		} else {

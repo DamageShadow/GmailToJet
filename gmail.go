@@ -1,10 +1,8 @@
 package main
 
 import (
-	//"bufio"
 	"net/http"
 	"sort"
-	//"strings"
 
 	gmail "google.golang.org/api/gmail/v1"
 	"github.com/goinggo/tracelog"

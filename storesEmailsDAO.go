@@ -5,18 +5,36 @@ import "github.com/bobintornado/boltdb-boilerplate"
 import (
 	"github.com/goinggo/tracelog"
 	"fmt"
+	"strings"
+
 )
 
 var (
 	storeBucket string = "storesEmails"
 	defaultEmail string = "@"
+	dbFile string = "./db/storesDatabase.boltdb"
 )
 
 func init() {
 	// Init buckets and create file
 	buckets := []string{storeBucket}
+	/*
 
-	err := boltdbboilerplate.InitBolt("./storesDatabase.boltdb", buckets)
+	f, err := os.Create(dbFile)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.Chmod(dbFile, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+	f.Close()
+	*/
+
+	err := boltdbboilerplate.InitBolt("./db/storesDatabase.boltdb", buckets)
 	if err != nil {
 		tracelog.Errorf(fmt.Errorf("Exception At..."), "storesEmailDAO", "init", "Can't init storesDatabase boltDB")
 	}
@@ -47,22 +65,16 @@ func insertAll(newStores []string) {
 	newcomers, obsolete := difference(newStores, existingStores)
 
 	if (newcomers != nil) {
-		for i := range newcomers {
+		for _, i := range newcomers {
 			insertStore(i)
 		}
 	}
 
 	if (obsolete != nil) {
-		for i := range obsolete {
+		for _, i := range obsolete {
 			insertStore(i)
 		}
 	}
-}
-
-func getStore(store string) (string) {
-	value := boltdbboilerplate.Get([]byte(storeBucket), []byte(store))
-
-	return value
 }
 
 func insertStoreWithEmail(store string, email string) {
@@ -78,30 +90,44 @@ func insertStoreWithEmail(store string, email string) {
 
 func updateStoreWithEmail(store string, email string) {
 	//Delete default pair-value for store if exists and insert store with email
-	if (getStore(store) != nil) {
+
+	if (getStoreEmail(store) != "") {
 		deleteStore(store)
 	}
 
 	insertStoreWithEmail(store, email)
 }
 
+func getStoreEmail(store string) (string) {
+	value := boltdbboilerplate.Get([]byte(storeBucket), []byte(store))
+
+	return string(value)
+}
+
 func getAllStores() []string {
+	var stores []string
 	// Get all keys (stores)
-	stores := boltdbboilerplate.GetAllKeys([]byte(storeBucket))
-	tracelog.Info("storesEmailDAO", "getAllStores", "Extracted Stores : " + stores)
+	storesBytes := boltdbboilerplate.GetAllKeys([]byte(storeBucket))
+
+	for _, i := range storesBytes {
+		stores = append(stores, string(i))
+	}
+
+	tracelog.Info("storesEmailDAO", "getAllStores", "Extracted Stores : " + strings.Join(stores[:], ","))
 	return stores
 }
 
 func getAllStoresEmails() []string {
 	// Get all values (emails)
 	storesMap := boltdbboilerplate.GetAllKeyValues([]byte(storeBucket))
-	tracelog.Info("storesEmailDAO", "getAllStores", "Extracted Stores : " + storesMap)
 
 	emails := make([]string, 0, len(storesMap))
 
-	for _, value := range storesMap {
+	tracelog.Info("storesEmailDAO", "getAllStores", "Extracted Stores Emails : " + strings.Join(emails[:], ","))
+
+	for _, value := range emails {
 		//remove empty or unknown emails
-		if (value != nil && value != "@") {
+		if (value != "" && value != "@") {
 			emails = append(emails, value)
 		}
 	}

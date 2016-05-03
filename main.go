@@ -27,9 +27,9 @@ import (
 // Flags
 var (
 	clientID = flag.String("clientid", "schedov@gmail.com", "OAuth 2.0 Client ID.  If non-empty, overrides --clientid_file")
-	clientIDFile = flag.String("clientid-file", "clientid.dat",
+	clientIDFile = flag.String("clientid-file", "client_id.json",
 		"Name of a file containing just the project's OAuth 2.0 Client ID from https://developers.google.com/console.")
-	secret = flag.String("secret", "", "OAuth 2.0 Client Secret.  If non-empty, overrides --secret_file")
+	secret = flag.String("secret", "client_secret!!!!!!!.json", "OAuth 2.0 Client Secret.  If non-empty, overrides --secret_file")
 	secretFile = flag.String("secret-file", "clientsecret.dat",
 		"Name of a file containing just the project's OAuth 2.0 Client Secret from https://developers.google.com/console.")
 	cacheToken = flag.Bool("cachetoken", true, "cache the OAuth 2.0 token")
@@ -68,15 +68,14 @@ func main() {
 		Scopes:       []string{demoScope[name]},
 	}
 
-
 	ctx := context.Background()
-/*
-	b, err := ioutil.ReadFile("client_secret.json")
+	/*
+		b, err := ioutil.ReadFile("client_secret.json")
 
-	config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
-	if err != nil {
-		tracelog.Errorf(fmt.Errorf("Exception At..."), "main", "main","Unable to parse client secret file to config: %v", err)
-	}*/
+		config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
+		if err != nil {
+			tracelog.Errorf(fmt.Errorf("Exception At..."), "main", "main","Unable to parse client secret file to config: %v", err)
+		}*/
 
 	if *debug {
 		ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{

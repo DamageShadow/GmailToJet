@@ -21,8 +21,6 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	"google.golang.org/api/gmail/v1"
-
 	"github.com/goinggo/tracelog"
 )
 
@@ -63,15 +61,22 @@ func main() {
 		usage()
 	}
 
-	ctx := context.Background()
+	config := &oauth2.Config{
+		ClientID:     valueOrFileContents(*clientID, *clientIDFile),
+		ClientSecret: valueOrFileContents(*secret, *secretFile),
+		Endpoint:     google.Endpoint,
+		Scopes:       []string{demoScope[name]},
+	}
 
+
+	ctx := context.Background()
+/*
 	b, err := ioutil.ReadFile("client_secret.json")
 
 	config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
 	if err != nil {
 		tracelog.Errorf(fmt.Errorf("Exception At..."), "main", "main","Unable to parse client secret file to config: %v", err)
-	}
-	//client := getClient(ctx, config)
+	}*/
 
 	if *debug {
 		ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
@@ -97,7 +102,7 @@ func registerDemo(name, scope string, main func(c *http.Client, argv []string)) 
 
 // getClient uses a Context and Config to retrieve a Token
 // then generate a Client. It returns the generated Client.
-func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
+/*func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
 	cacheFile := tokenCacheFile(config)
 
 	tok, err := tokenFromFile(cacheFile)
@@ -106,11 +111,11 @@ func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
 		saveToken(cacheFile, tok)
 	}
 	return config.Client(ctx, tok)
-}
+}*/
 
 // getTokenFromWeb uses Config to request a Token.
 // It returns the retrieved Token.
-func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
+/*func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	tracelog.Info("main", "getTokenFromWeb", "Go to the following link in your browser then type the " +
 	"authorization code: \n%v\n", authURL)
@@ -125,7 +130,7 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 		tracelog.Errorf(fmt.Errorf("Exception At..."), "main", "getTokenFromWeb", "Unable to retrieve token from web %v", err)
 	}
 	return tok
-}
+}*/
 
 func osUserCacheDir() string {
 	switch runtime.GOOS {

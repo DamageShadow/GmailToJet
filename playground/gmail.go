@@ -51,9 +51,9 @@ func gmailMain(client *http.Client, argv []string) {
 
 	//queryStr := fmt.Sprintf("from:%v newer_than:%v", "confirmation@mail.hotels.com", "50d")
 
-	emails := getAllStoresEmails()
+	//emails := getAllStoresEmails()
 
-	queryStr := buildQueryString(emails)
+	queryStr := ""//buildQueryString(emails)
 
 	for {
 		req := svc.Users.Messages.List("me").Q(queryStr)

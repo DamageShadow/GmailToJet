@@ -60,9 +60,9 @@ func deleteStore(store string) {
 
 func insertAll(newStores []string) {
 	//Get the list of stores, insert new, delete obsolete with empty contact email
-	existingStores := getAllStores()
+	//existingStores := getAllStores()
 
-	newcomers, obsolete := difference(newStores, existingStores)
+	/*newcomers, obsolete := difference(newStores, existingStores)
 
 	if (newcomers != nil) {
 		for _, i := range newcomers {
@@ -74,7 +74,7 @@ func insertAll(newStores []string) {
 		for _, i := range obsolete {
 			insertStore(i)
 		}
-	}
+	}*/
 }
 
 func insertStoreWithEmail(store string, email string) {

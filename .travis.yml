@@ -4,4 +4,13 @@ go:
   - 1.6.3
   - tip
 
-after_success: coveralls
+# Whitelisting
+branches:
+  only:
+    - master
+
+install:
+  - pip install coveralls
+
+after_success:
+  -coveralls

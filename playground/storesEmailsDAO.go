@@ -4,9 +4,7 @@ import "github.com/bobintornado/boltdb-boilerplate"
 
 import (
 	"github.com/goinggo/tracelog"
-	"fmt"
 	"strings"
-
 )
 
 var (
@@ -34,9 +32,11 @@ func init() {
 	f.Close()
 	*/
 
-	err := boltdbboilerplate.InitBolt("./db/storesDatabase.boltdb", buckets)
+	err := boltdbboilerplate.InitBolt(dbFile, buckets)
 	if err != nil {
-		tracelog.Errorf(fmt.Errorf("Exception At..."), "storesEmailDAO", "init", "Can't init storesDatabase boltDB")
+		//tracelog.Errorf(fmt.Errorf("Exception At..."), "storesEmailDAO", "init", "Can't init storesDatabase boltDB")
+
+		panic("Can't init DB")
 	}
 }
 
@@ -138,30 +138,3 @@ func closeDb() {
 	// Close
 	boltdbboilerplate.Close()
 }
-
-
-/*	// Exampless
-	// Put
-	err := boltdbboilerplate.Put([]byte(storeBucket), []byte("ownerKey"), []byte("username"))
-
-	// Get owner
-	value := boltdbboilerplate.Get([]byte(storeBucket), []byte("ownerKey"))
-
-	// Delete
-	err = boltdbboilerplate.Delete([]byte(storeBucket), []byte("ownerKey"))
-
-	// Insert two key/value
-	err = boltdbboilerplate.Put([]byte(storeBucket), []byte("key1"), []byte("value1"))
-	err = boltdbboilerplate.Put([]byte(storeBucket), []byte("key2"), []byte("value2"))
-
-
-
-	// Get all key/value pairs
-	pairs := boltdbboilerplate.GetAllKeyValues([]byte(storeBucket))
-	// pairs = [{Key:key1, Value:value1}, {Key: key2, Value:value2}]
-
-	// Close
-	boltdbboilerplate.Close()
-
-*/
-

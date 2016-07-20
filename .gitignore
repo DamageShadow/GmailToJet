@@ -29,5 +29,5 @@ _testmain.go
 
 GmailToJet
 
-client_id.json
-client_secret.json
+keys/client_id.json
+keys/client_secret.json

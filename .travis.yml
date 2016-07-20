@@ -8,9 +8,11 @@ go:
 branches:
   only:
     - master
+before_install:
+  - sudo pip install --upgrade pip
+  - sudo pip install requests --upgrade
 
 install:
-  - sudo pip install --upgrade pip
   - sudo pip install coveralls
 
 after_success:

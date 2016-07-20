@@ -219,6 +219,9 @@ func saveToken(file string, token *oauth2.Token) {
 }
 
 func main() {
+
+	tracelog.StartFile(tracelog.LevelTrace, "./Users/bill/Temp/logs", 1)
+
 	ctx := context.Background()
 
 	b, err := ioutil.ReadFile("./keys/client_secret_web.json")

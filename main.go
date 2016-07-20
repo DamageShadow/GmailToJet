@@ -20,12 +20,12 @@ var (
 	// Set callback to http://127.0.0.1:7000/github_oauth_cb
 	// Set ClientId and ClientSecret to
 	oauthConf = &oauth2.Config{
-/*		ClientID:     "965925130911-lb3hu48uj4u5ab1l8acs7e3u40fqlve4.apps.googleusercontent.com",
-		ClientSecret: "6JctRfqfnGeOHPiDBluaRd-o",
-		// select level of access you want https://developer.github.com/v3/oauth/#scopes
-		Scopes:      []string{gmail.MailGoogleComScope},
-		Endpoint:    googleOauth.Endpoint,
-		RedirectURL: "http://localhost:4567/oauth2",*/
+		/*		ClientID:     "965925130911-lb3hu48uj4u5ab1l8acs7e3u40fqlve4.apps.googleusercontent.com",
+				ClientSecret: "6JctRfqfnGeOHPiDBluaRd-o",
+				// select level of access you want https://developer.github.com/v3/oauth/#scopes
+				Scopes:      []string{gmail.MailGoogleComScope},
+				Endpoint:    googleOauth.Endpoint,
+				RedirectURL: "http://localhost:4567/oauth2",*/
 	}
 	// random string for oauth2 API calls to protect against CSRF
 	oauthStateString = "thisshouldberandom"
@@ -107,11 +107,12 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	var total int64
+	//var total int64
 	msgs := []message{}
 	pageToken := ""
 
 	//queryStr := fmt.Sprintf("from:%v newer_than:%v", "confirmation@mail.hotels.com", "50d")
+	//queryStr := fmt.Sprintf("from:%v", "confirmation@mail.hotels.com")
 
 	emails := getAllStoresEmails()
 
@@ -120,12 +121,21 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Search string is = ", queryStr)
 
 	for {
+		rq, _ := gmailService.Users.GetProfile("me").Do()
+
+		fmt.Println("Profile email = ", rq.EmailAddress)
+
 		req := gmailService.Users.Messages.List("me").Q(queryStr)
+
+		fmt.Println("Request = ", req)
 		if pageToken != "" {
+			fmt.Println("pageToken before = ", pageToken)
 			req.PageToken(pageToken)
+			fmt.Println("pageToken after = ", pageToken)
 		}
-		r, err := req.Do()
-		if err != nil {
+
+		r, _ := req.Do()
+		/*if err != nil {
 			tracelog.Errorf(fmt.Errorf("Exception At..."), "gmail", "gmailMain",
 				"Unable to retrieve messages: %v", err)
 		}
@@ -133,14 +143,16 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 			tracelog.Info("gmail", "gmailMain", "Processing %v messages...\n", len(r.Messages))
 		} else {
 			tracelog.Info("gmail", "gmailMain", "No messages to process")
-		}
+		}*/
 		for _, m := range r.Messages {
 			msg, err := gmailService.Users.Messages.Get("me", m.Id).Do()
+			fmt.Println("Msgs", msg)
 			if err != nil {
 				tracelog.Errorf(fmt.Errorf("Exception At..."), "gmail",
 					"gmailMain", "Unable to retrieve message %v: %v", m.Id, err)
 			}
-			total += msg.SizeEstimate
+			//total += msg.SizeEstimate / 1024 /1024
+
 			date := ""
 			subject := ""
 			for _, h := range msg.Payload.Headers {
@@ -165,7 +177,7 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 		}
 		pageToken = r.NextPageToken
 	}
-	tracelog.Info("gmail", "gmailMain", "total: %v\n", total)
+	//tracelog.Info("gmail", "gmailMain", "total: %v\n", total)
 
 	convertDateToDateTime(msgs)
 
@@ -203,6 +215,9 @@ func forwardToJetAnywhere(message message) {
 }
 
 func main() {
+
+	tracelog.StartFile(tracelog.LevelTrace, "./logs", 1)
+
 	b, err := ioutil.ReadFile("./keys/client_secret_web.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
@@ -211,7 +226,7 @@ func main() {
 	// If modifying these scopes, delete your previously saved credentials
 	// at ~/.credentials/gmail-go-quickstart.json
 
-	oauthConf, err = googleOauth.ConfigFromJSON(b, gmail.GmailReadonlyScope)
+	oauthConf, err = googleOauth.ConfigFromJSON(b, gmail.MailGoogleComScope)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}

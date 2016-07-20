@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 func buildQueryString(emails []string) (string) {
 	//from:(confirmation@mail.hotels.com OR marriott-support@iseatz.com) subject:confirmation newer_than:14d
 	finalStr := ""
@@ -20,8 +18,6 @@ func buildQueryString(emails []string) (string) {
 	emailStr = emailStr + ")"
 	// Format string as example
 	finalStr = emailStr + confimationStr + newerThanStr
-
-	fmt.Println("Search string is = ", finalStr)
 
 	return finalStr
 }

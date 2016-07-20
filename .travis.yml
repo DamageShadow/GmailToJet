@@ -10,7 +10,8 @@ branches:
     - master
 
 install:
-  - pip install coveralls
+  - sudo pip install --upgrade pip
+  - sudo pip install coveralls
 
 after_success:
   -coveralls

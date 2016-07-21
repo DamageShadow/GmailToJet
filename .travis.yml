@@ -1,7 +1,8 @@
 language: go
+sudo: true
 
 go:
-  - 1.6.3
+ # - 1.6.3
   - tip
 
 #Importing of external libs
@@ -12,13 +13,14 @@ branches:
   only:
     - master
 
-# Prepare Python environment
 before_install:
+# Prepare Python environment
   - sudo pip install --upgrade pip
   - sudo pip install requests --upgrade
-
-# Install external libs and Coveralls to check coverage
-install:
+# Coveralls part
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+# Libs
   - go get github.com/calbucci/go-htmlparser
   - go get github.com/goinggo/tracelog
   - go get github.com/nu7hatch/gouuid
@@ -27,17 +29,14 @@ install:
   - go get golang.org/x/oauth2/google
   - go get google.golang.org/api/gmail/v1
 
-  - sudo pip install coveralls
+# Install external libs and Coveralls to check coverage
+#install:
+#  - sudo pip install coveralls
 
 script:
-  - make test
-
-# Run Coveralls after build
-after_success:
-  - coveralls
+  - $HOME/gopath/bin/goveralls -service=travis-ci
 
 notifications:
   email:
     on_success: change
     on_failure: always
-  

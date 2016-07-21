@@ -9,6 +9,7 @@ _test
 .idea
 db
 logs
+.credentials/
 
 # Architecture specific extensions/prefixes
 *.[568vq]
@@ -29,5 +30,6 @@ _testmain.go
 
 GmailToJet
 
-keys/client_id.json
-keys/client_secret.json
+keys/*
+
+

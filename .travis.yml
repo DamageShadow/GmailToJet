@@ -34,7 +34,7 @@ script:
 
 # Run Coveralls after build
 after_success:
-  -coveralls
+  - coveralls
 
 notifications:
   email:

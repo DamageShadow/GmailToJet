@@ -1,6 +1,6 @@
 package main
 
-func buildQueryString(emails []string) (string) {
+func buildQueryString(emails []string) string {
 	//from:(confirmation@mail.hotels.com OR marriott-support@iseatz.com) subject:confirmation newer_than:14d
 	finalStr := ""
 	emailStr := "from:("
@@ -8,7 +8,7 @@ func buildQueryString(emails []string) (string) {
 	confimationStr := " subject:confirmation"
 
 	for _, email := range emails {
-		if (emailStr == "from:(") {
+		if emailStr == "from:(" {
 			emailStr = emailStr + email
 		} else {
 			emailStr = emailStr + " OR " + email

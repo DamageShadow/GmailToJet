@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/goinggo/tracelog"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	googleOauth "golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
-	"golang.org/x/net/context"
 )
 
 var (
@@ -20,12 +20,12 @@ var (
 	// Set callback to http://127.0.0.1:7000/github_oauth_cb
 	// Set ClientId and ClientSecret to
 	oauthConf = &oauth2.Config{
-		/*		ClientID:     "965925130911-lb3hu48uj4u5ab1l8acs7e3u40fqlve4.apps.googleusercontent.com",
-				ClientSecret: "6JctRfqfnGeOHPiDBluaRd-o",
-				// select level of access you want https://developer.github.com/v3/oauth/#scopes
-				Scopes:      []string{gmail.MailGoogleComScope},
-				Endpoint:    googleOauth.Endpoint,
-				RedirectURL: "http://localhost:4567/oauth2",*/
+	/*		ClientID:     "965925130911-lb3hu48uj4u5ab1l8acs7e3u40fqlve4.apps.googleusercontent.com",
+			ClientSecret: "6JctRfqfnGeOHPiDBluaRd-o",
+			// select level of access you want https://developer.github.com/v3/oauth/#scopes
+			Scopes:      []string{gmail.MailGoogleComScope},
+			Endpoint:    googleOauth.Endpoint,
+			RedirectURL: "http://localhost:4567/oauth2",*/
 	}
 	// random string for oauth2 API calls to protect against CSRF
 	oauthStateString = "thisshouldberandom"
@@ -186,7 +186,7 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 	count := 0
 	for _, m := range msgs {
 		count++
-		tracelog.Info("gmail", "gmailMain", "\nMessage URL: https://mail.google.com/mail/u/0/#all/%v\n" +
+		tracelog.Info("gmail", "gmailMain", "\nMessage URL: https://mail.google.com/mail/u/0/#all/%v\n"+
 			"Subject: %q ,Size: %v, Date: %v, Snippet: %q\n",
 			m.gmailID, m.subject, m.size, m.date, m.snippet)
 

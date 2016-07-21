@@ -1,14 +1,14 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/goinggo/tracelog"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
-	"io"
-	"flag"
 	"path"
-	"github.com/goinggo/tracelog"
-	"io/ioutil"
 
 	"github.com/calbucci/go-htmlparser"
 )
@@ -32,7 +32,7 @@ func extract(filename string) []string {
 	parser.Parse(nil, func(e *htmlparser.HtmlElement, isEmpty bool) {
 		if e.TagName == "a" {
 			class, _ := e.GetAttributeValue("class")
-			if (class == "affiliate_link card_container") {
+			if class == "affiliate_link card_container" {
 				//stores = append(stores, e.Attributes)
 				rel, _ := e.GetAttributeValue("rel")
 
@@ -75,7 +75,7 @@ func prepairListOfStores() {
 	//tracelog.Info("getListOfStrores", "main", "Checking if " + filename + " exists ...")
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		download(url, filename)
-		tracelog.Trace("getListOfStores", "main", filename + " saved!")
+		tracelog.Trace("getListOfStores", "main", filename+" saved!")
 	} else {
 		//tracelog.Trace("getListOfStores", "main", filename + " already exists!")
 	}
@@ -88,6 +88,6 @@ func prepairListOfStores() {
 	insertAll(extractedResult)
 }
 
-func getListOfStoresEmails() ([]string) {
+func getListOfStoresEmails() []string {
 	return getAllStoresEmails()
 }

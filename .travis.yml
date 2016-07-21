@@ -6,13 +6,6 @@ go:
 
 #Importing of external libs
 go_import_path:
-  - github.com/calbucci/go-htmlparser
-  - github.com/goinggo/tracelog
-  - github.com/nu7hatch/gouuid
-  - golang.org/x/net/context
-  - golang.org/x/oauth2
-  - golang.org/x/oauth2/google
-  - google.golang.org/api/gmail/v1
 
 # Whitelisting branches
 branches:
@@ -24,11 +17,27 @@ before_install:
   - sudo pip install --upgrade pip
   - sudo pip install requests --upgrade
 
-# Install Coveralls to check coverage
+# Install external libs and Coveralls to check coverage
 install:
+  - go get github.com/calbucci/go-htmlparser
+  - go get github.com/goinggo/tracelog
+  - go get github.com/nu7hatch/gouuid
+  - go get golang.org/x/net/context
+  - go get golang.org/x/oauth2
+  - go get golang.org/x/oauth2/google
+  - go get google.golang.org/api/gmail/v1
+
   - sudo pip install coveralls
+
+script:
+  - make test
 
 # Run Coveralls after build
 after_success:
   -coveralls
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
   

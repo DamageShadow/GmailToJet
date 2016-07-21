@@ -16,11 +16,11 @@ func TestDifference(t *testing.T) {
 
 	t.Log(dif1, " and ", dif2)
 
-	if (dif1[0] != properDif1[0] && dif1[1] != properDif1[1]) {
+	if dif1[0] != properDif1[0] && dif1[1] != properDif1[1] {
 		t.Error("Dif1 is wrong")
 	}
 
-	if (dif2[0] != properDif2[0]) {
+	if dif2[0] != properDif2[0] {
 		t.Error("Dif2 is wrong")
 	}
 

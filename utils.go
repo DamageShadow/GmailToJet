@@ -1,19 +1,19 @@
 package main
 
 import (
-	"time"
-	"github.com/goinggo/tracelog"
-	"sort"
-	"github.com/nu7hatch/gouuid"
-	"fmt"
-	"os"
-	"log"
 	"encoding/json"
-	"golang.org/x/oauth2"
-	"path/filepath"
-	"net/url"
-	"net/http"
+	"fmt"
+	"github.com/goinggo/tracelog"
+	"github.com/nu7hatch/gouuid"
 	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
+	"log"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"sort"
+	"time"
 )
 
 func difference(slice1 []string, slice2 []string) ([]string, []string) {
@@ -97,9 +97,9 @@ func saveToken(file string, token *oauth2.Token) {
 
 // tokenCacheFile generates credential file path/filename.
 // It returns the generated credential path/filename.
-func tokenCacheFile() (string) {
+func tokenCacheFile() string {
 	/*usr, err := user.Current()
-	*/
+	 */
 	tokenCacheDir := filepath.Join("./", ".credentials")
 	os.MkdirAll(tokenCacheDir, 0700)
 

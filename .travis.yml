@@ -4,16 +4,31 @@ go:
   - 1.6.3
   - tip
 
-# Whitelisting
+#Importing of external libs
+go_import_path:
+  - github.com/calbucci/go-htmlparser
+  - github.com/goinggo/tracelog
+  - github.com/nu7hatch/gouuid
+  - golang.org/x/net/context
+  - golang.org/x/oauth2
+  - golang.org/x/oauth2/google
+  - google.golang.org/api/gmail/v1
+
+# Whitelisting branches
 branches:
   only:
     - master
+
+# Prepare Python environment
 before_install:
   - sudo pip install --upgrade pip
   - sudo pip install requests --upgrade
 
+# Install Coveralls to check coverage
 install:
   - sudo pip install coveralls
 
+# Run Coveralls after build
 after_success:
   -coveralls
+  

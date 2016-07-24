@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>GmailToJet</title>
+</head>
+<style>
+    #customBtn {
+        width: 155px;
+    }
+
+    #customBtn:hover {
+        box-shadow: 2px 2px 3px #888888;
+        border-radius: 5px;
+        cursor: hand;
+    }
+</style>
+<body>
+<div id="gConnect">
+    <img id="customBtn" src="static/signin_button.png" onClick="signInClick()"
+         alt="Sign in with Google+"/>
+</div>
+
+</body>
+<script type="text/javascript">
+    function signInClick() {
+        window.location.href = "/login";
+    }
+</script>
+</html>

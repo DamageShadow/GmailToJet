@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	// You must register the app at https://github.com/settings/applications
-	// Set callback to http://127.0.0.1:7000/github_oauth_cb
+	// You must register the app at https://console.developers.google.com/apis/credentials
+	// Set callback to http://127.0.0.1:4567/GTJoauth2callback
 	// Set ClientId and ClientSecret to
 	oauthConf = &oauth2.Config{
 	/*		ClientID:     "965925130911-lb3hu48uj4u5ab1l8acs7e3u40fqlve4.apps.googleusercontent.com",
@@ -29,6 +29,8 @@ var (
 	}
 	// random string for oauth2 API calls to protect against CSRF
 	oauthStateString = "thisshouldberandom"
+	htmlIndex        []byte //= `<html><body><h1>Logged in with <a href="/login">Gmail</a><h1></body></html>`
+	errorf           = fmt.Errorf("Exception At...")
 )
 
 type message struct {
@@ -42,160 +44,85 @@ type message struct {
 
 type timeSlice []message
 
-const htmlIndex = `<html><body><h1>Logged in with <a href="/login">Gmail</a><h1></body></html>`
+// Respond on initial page request
+func mainHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		began := time.Now()
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(htmlIndex))
 
-// /
-func handleMain(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(htmlIndex))
+		tracelog.Trace("gmail", "gmailMain", "%s %s took %s", r.Method, r.URL, time.Since(began))
+	})
 }
 
-// /login
-func handleGmailLogin(w http.ResponseWriter, r *http.Request) {
+//After success page handler
+func finishedHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		began := time.Now()
 
-	oauthConf.RedirectURL = "http://localhost:4567/GTJoauth2callback"
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`<html><body><h1>Successfully finished<h1></body></html>`))
 
-	oauthStateString = generateUUID().String()
-
-	url := oauthConf.AuthCodeURL(oauthStateString, oauth2.AccessTypeOnline)
-
-	fmt.Println("URL will be = ", url)
-
-	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+		tracelog.Trace("gmail", "gmailMain", "%s %s took %s", r.Method, r.URL, time.Since(began))
+	})
 }
 
-// /Gmail oauth callback. Called by gmail after authorization is granted
-func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
+// login
+func gmailLoginHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		began := time.Now()
 
-	state := r.FormValue("state")
-	if state != oauthStateString {
-		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
-	}
+		oauthConf.RedirectURL = "http://localhost:4567/GTJoauth2callback"
+		oauthStateString = generateUUID().String()
+		url := oauthConf.AuthCodeURL(oauthStateString, oauth2.AccessTypeOnline)
+		fmt.Println("URL will be = ", url)
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 
-	fmt.Println("Recevied URL callback = ", r.RequestURI)
+		tracelog.Trace("gmail", "gmailMain", "%s %s took %s", r.Method, r.URL, time.Since(began))
+	})
+}
 
-	code := r.FormValue("code")
+// Gmail oauth callback. Called by gmail after authorization is granted
+func gmailCallbackHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		began := time.Now()
 
-	fmt.Println("Recevied code = ", code)
+		state := r.FormValue("state")
+		if state != oauthStateString {
+			fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			return
+		}
+		fmt.Println("Recevied URL callback = ", r.RequestURI)
 
-	token, err := oauthConf.Exchange(oauth2.NoContext, code)
+		code := r.FormValue("code")
+		fmt.Println("Recevied code = ", code)
 
-	if err != nil {
-		fmt.Printf("oauthConf.Exchange() failed with '%s'\n", err)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
-	}
-
-	client := oauthConf.Client(context.Background(), token) //oauth2.NoContext
-
-	fmt.Println("Client is ready = ", client)
-
-	gmailService, err := gmail.New(client)
-
-	if err != nil {
-		log.Fatalf("Unable to retrieve gmail Client %v", err)
-	}
-
-	if err != nil {
-		tracelog.Errorf(fmt.Errorf("Exception At..."),
-			"gmail", "gmailMain", "Unable to create Gmail service: %v", err)
-	} else {
-		fmt.Println("Service established = ", gmailService)
-
-	}
-
-	//var total int64
-	msgs := []message{}
-	pageToken := ""
-
-	//queryStr := fmt.Sprintf("from:%v newer_than:%v", "confirmation@mail.hotels.com", "50d")
-	//queryStr := fmt.Sprintf("from:%v", "confirmation@mail.hotels.com")
-
-	emails := getAllStoresEmails()
-
-	queryStr := buildQueryString(emails)
-
-	fmt.Println("Search string is = ", queryStr)
-
-	for {
-		rq, _ := gmailService.Users.GetProfile("me").Do()
-
-		fmt.Println("Profile email = ", rq.EmailAddress)
-
-		req := gmailService.Users.Messages.List("me").Q(queryStr)
-
-		fmt.Println("Request = ", req)
-		if pageToken != "" {
-			fmt.Println("pageToken before = ", pageToken)
-			req.PageToken(pageToken)
-			fmt.Println("pageToken after = ", pageToken)
+		token, err := oauthConf.Exchange(oauth2.NoContext, code)
+		if err != nil {
+			fmt.Printf("oauthConf.Exchange() failed with '%s'\n", err)
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			return
 		}
 
-		r, _ := req.Do()
-		/*if err != nil {
-			tracelog.Errorf(fmt.Errorf("Exception At..."), "gmail", "gmailMain",
-				"Unable to retrieve messages: %v", err)
-		}
-		if r.Messages != nil {
-			tracelog.Info("gmail", "gmailMain", "Processing %v messages...\n", len(r.Messages))
+		client := oauthConf.Client(context.Background(), token)
+		gmailService, err := gmail.New(client)
+
+		if err != nil {
+			tracelog.Errorf(errorf,
+				"gmail", "gmailMain", "Unable to create Gmail service: %v", err)
 		} else {
-			tracelog.Info("gmail", "gmailMain", "No messages to process")
-		}*/
-		for _, m := range r.Messages {
-			msg, err := gmailService.Users.Messages.Get("me", m.Id).Do()
-			fmt.Println("Msgs", msg)
-			if err != nil {
-				tracelog.Errorf(fmt.Errorf("Exception At..."), "gmail",
-					"gmailMain", "Unable to retrieve message %v: %v", m.Id, err)
-			}
-			//total += msg.SizeEstimate / 1024 /1024
-
-			date := ""
-			subject := ""
-			for _, h := range msg.Payload.Headers {
-				if h.Name == "Date" {
-					date = h.Value
-				}
-				if h.Name == "Subject" {
-					subject = h.Value
-				}
-			}
-			msgs = append(msgs, message{
-				size:    msg.SizeEstimate,
-				gmailID: msg.Id,
-				date:    date,
-				snippet: msg.Snippet,
-				subject: subject,
-			})
+			fmt.Println("Service established = ", gmailService)
 		}
 
-		if r.NextPageToken == "" {
-			break
-		}
-		pageToken = r.NextPageToken
-	}
-	//tracelog.Info("gmail", "gmailMain", "total: %v\n", total)
+		processMessagesInInbox(gmailService)
 
-	convertDateToDateTime(msgs)
+		http.Redirect(w, r, "/finished", http.StatusTemporaryRedirect)
 
-	sortByDate(msgs)
-
-	count := 0
-	for _, m := range msgs {
-		count++
-		tracelog.Info("gmail", "gmailMain", "\nMessage URL: https://mail.google.com/mail/u/0/#all/%v\n"+
-			"Subject: %q ,Size: %v, Date: %v, Snippet: %q\n",
-			m.gmailID, m.subject, m.size, m.date, m.snippet)
-
-		forwardToJetAnywhere(m)
-
-		/*if err := svc.Users.Messages.Delete("me", m.gmailID).Do(); err != nil {*/
-	}
-
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		tracelog.Trace("gmail", "gmailMain", "%s %s took %s", r.Method, r.URL, time.Since(began))
+	})
 }
 
 func (messages timeSlice) Len() int {
@@ -210,15 +137,16 @@ func (messages timeSlice) Swap(i, j int) {
 	messages[i], messages[j] = messages[j], messages[i]
 }
 
-func forwardToJetAnywhere(message message) {
-
-}
-
 func main() {
 
 	tracelog.StartFile(tracelog.LevelTrace, "./logs", 1)
 
-	b, err := ioutil.ReadFile("./keys/client_secret_web.json")
+	clientSecret, err := ioutil.ReadFile("./keys/client_secret_web.json")
+	if err != nil {
+		log.Fatalf("Unable to read client secret file: %v", err)
+	}
+
+	htmlIndex, err = ioutil.ReadFile("./index.html")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
@@ -226,16 +154,19 @@ func main() {
 	// If modifying these scopes, delete your previously saved credentials
 	// at ~/.credentials/gmail-go-quickstart.json
 
-	oauthConf, err = googleOauth.ConfigFromJSON(b, gmail.MailGoogleComScope)
+	oauthConf, err = googleOauth.ConfigFromJSON(clientSecret, gmail.MailGoogleComScope)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
 	fmt.Println("oauthConf = ", oauthConf)
 
-	http.HandleFunc("/", handleMain)
-	http.HandleFunc("/login", handleGmailLogin)
-	http.HandleFunc("/GTJoauth2callback", handleGmailCallback)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
+	http.Handle("/", mainHandler())
+	http.Handle("/login", gmailLoginHandler())
+	http.Handle("/GTJoauth2callback", gmailCallbackHandler())
+	http.Handle("/finished", finishedHandler())
 
 	fmt.Println("Started running on http://127.0.0.1:4567")
 

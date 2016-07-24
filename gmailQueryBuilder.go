@@ -1,23 +1,28 @@
 package main
 
+const (
+	finalStr       = ""
+	emailStr       = "from:("
+	newerThanStr   = " newer_than:140d"
+	confimationStr = " subject:confirmation"
+)
+
 func buildQueryString(emails []string) string {
 	//from:(confirmation@mail.hotels.com OR marriott-support@iseatz.com) subject:confirmation newer_than:14d
-	finalStr := ""
-	emailStr := "from:("
-	newerThanStr := " newer_than:140d"
-	confimationStr := " subject:confirmation"
+
+	query := emailStr
 
 	for _, email := range emails {
-		if emailStr == "from:(" {
-			emailStr = emailStr + email
+		if query == "from:(" {
+			query = emailStr + email
 		} else {
-			emailStr = emailStr + " OR " + email
+			query = emailStr + " OR " + email
 		}
 	}
 	//Close brackets
-	emailStr = emailStr + ")"
+	query = emailStr + ")"
 	// Format string as example
-	finalStr = emailStr + confimationStr + newerThanStr
+	query = emailStr + confimationStr + newerThanStr
 
-	return finalStr
+	return query
 }

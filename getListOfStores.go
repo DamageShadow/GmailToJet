@@ -27,7 +27,9 @@ func extract(filename string) []string {
 
 	parser := htmlparser.NewParser(s)
 
-	//<a href="/anywhere/redirect?id=318" target="_blank" rel="L.K. Bennett" data-rate="8.5" class="affiliate_link card_container">
+	//Exmaple
+	// <a href="/anywhere/redirect?id=318" target="_blank" rel="L.K. Bennett"
+	// data-rate="8.5" class="affiliate_link card_container">
 
 	parser.Parse(nil, func(e *htmlparser.HtmlElement, isEmpty bool) {
 		if e.TagName == "a" {
